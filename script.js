@@ -151,13 +151,29 @@ function header() {
   const isInApp = state.auth.isLoggedIn && !['home','login','signup','how','faq','safety'].includes(state.route);
   return `
     <div class="browser-bar">
-      <div class="brand">
+      <button class="brand brand-link" data-route="home" aria-label="Go to homepage">
         <img class="logo" src="assets/logo-badge.svg" alt="DoppelCrush logo" />
         <div>
           <h1>DoppelCrush</h1>
           <p>Because clearly you have good taste.</p>
         </div>
-      </div>
+      </button>
+
+      ${!isInApp ? `
+        <nav class="top-links">
+          <button class="top-link ${state.route === 'home' ? 'active' : ''}" data-route="home">Home</button>
+          <button class="top-link ${state.route === 'how' ? 'active' : ''}" data-route="how">How it works</button>
+          <button class="top-link ${state.route === 'safety' ? 'active' : ''}" data-route="safety">Safety</button>
+          <button class="top-link ${state.route === 'faq' ? 'active' : ''}" data-route="faq">FAQ</button>
+        </nav>
+      ` : `
+        <nav class="top-links app-links">
+          <button class="top-link ${state.route === 'discover' ? 'active' : ''}" data-route="discover">Discover</button>
+          <button class="top-link ${state.route === 'matches' ? 'active' : ''}" data-route="matches">Matches</button>
+          <button class="top-link ${state.route === 'chats' ? 'active' : ''}" data-route="chats">Chats</button>
+        </nav>
+      `}
+
       <div class="actions">
         ${!state.auth.isLoggedIn ? `
           <button class="btn btn-ghost" data-route="login">Login</button>
@@ -245,21 +261,21 @@ function homePage() {
       <div class="grid-2" style="margin-top:20px;">
         <section class="card form-card">
           <div class="kicker">How it works</div>
-          <h3 style="font-size:30px; margin:12px 0;">Cute, quick, and properly playable.</h3>
-          <p class="muted">Upload a selfie, pick Doppel or Chaos, swipe through matches, and chat if it clicks.</p>
+          <h3 style="font-size:30px; margin:12px 0;">Cute, quick, and easy to get into.</h3>
+          <p class="muted">Upload a selfie, pick your mode, meet your matches, and chat if it clicks.</p>
           <ol class="muted" style="line-height:1.8; font-size:18px; padding-left:22px;">
             <li>Sign up</li>
             <li>Upload your selfie</li>
-            <li>Build your profile</li>
-            <li>Choose Doppel or Chaos</li>
+            <li>Pick Doppel or Chaos</li>
+            <li>See your matches</li>
             <li>Like, match, and chat</li>
           </ol>
         </section>
         <section class="card form-card">
           <div class="kicker">Safety</div>
           <h3 style="font-size:30px; margin:12px 0;">18+, opt-in, and your photo only.</h3>
-          <p class="muted">This richer browser pack includes local branded assets so it feels much closer to the approved concept. The next production version would add a real shared backend for all users.</p>
-          <div class="notice">Upload this whole folder to GitHub for a live polished demo, then we can move to the real multi-user backend version.</div>
+          <p class="muted">Everyone you see joined on purpose. Use your own selfie, stay in control of your account, and use report/block tools if anything feels off.</p>
+          <div class="notice">For adults only. Selfies must be your own. You can reset your profile inside settings at any time.</div>
         </section>
       </div>
     </div>
@@ -273,6 +289,7 @@ function authPage(type='signup') {
       ${header()}
       <div class="auth-wrap">
         <div class="card auth-card">
+          <button class="back-home-link" data-route="home">← Back to homepage</button>
           <div class="kicker">${isSignup ? 'Create account' : 'Welcome back'}</div>
           <h2 style="font-size:42px; margin:10px 0 8px;">${isSignup ? 'Create your DoppelCrush account' : 'Your matches are waiting'}</h2>
           <p class="muted" style="font-size:18px;">${isSignup ? 'One selfie away from the plot twist.' : 'Log in to jump back into your feed.'}</p>
@@ -563,11 +580,11 @@ function settingsPage() {
       <h2 style="font-size:40px; margin:10px 0 18px;">Account and safety</h2>
       <div class="settings-list">
         <div class="setting-item"><span>Notifications</span><button class="btn btn-ghost" id="toggleNotifications">${state.notifications ? 'On' : 'Off'}</button></div>
-        <div class="setting-item"><span>Delete local demo data</span><button class="btn btn-ghost" id="resetBtn">Reset</button></div>
+        <div class="setting-item"><span>Reset this browser profile</span><button class="btn btn-ghost" id="resetBtn">Reset</button></div>
         <div class="setting-item"><span>Privacy and safety</span><span class="muted">18+, opt-in only</span></div>
         <div class="setting-item"><span>Logged in as</span><span class="muted">${escapeHtml(state.profile.email || 'demo')}</span></div>
       </div>
-      <div class="notice" style="margin-top:18px;">Production version next step: real auth, real storage, real moderation, and real multi-user chat.</div>
+      <div class="notice" style="margin-top:18px;">Use your own selfie only. If anything feels off inside chats, use the report/block controls.</div>
     </div>
   `, 'settings');
 }
@@ -602,7 +619,6 @@ function shell(content, activeNav = '') {
   return `
     <div class="app-shell">
       ${header()}
-      ${!state.demoNoticeSeen ? `<div class="notice" style="margin-bottom:16px;">This is a fully working browser demo app using local storage. It can go live on GitHub Pages or Netlify now. Multi-user backend comes next. <span class="linkish" id="hideNotice">Hide</span></div>` : ''}
       ${content}
       <div class="bottom-nav">
         ${navBtn('discover', 'Discover', activeNav)}
@@ -696,9 +712,9 @@ function render() {
     chats: chatsPage,
     settings: settingsPage,
     admin: adminPage,
-    how: () => shell(`<div class="card form-card"><h2>How it works</h2><p class="muted">Upload your selfie, pick your mode, meet your matches, and chat if it clicks.</p></div>`),
-    faq: () => shell(`<div class="card form-card"><h2>FAQ</h2><p class="muted">This demo runs locally in one browser. The production build will use a real backend.</p></div>`),
-    safety: () => shell(`<div class="card form-card"><h2>Safety</h2><p class="muted">18+, your photo only, opt-in only, report and block tools included.</p></div>`),
+    how: () => shell(`<div class="card form-card"><div class="kicker">How it works</div><h2 style="font-size:40px; margin:10px 0 18px;">Cute, quick, and easy to get into.</h2><div class="grid-2"><div><h3>1. Upload your selfie</h3><p class="muted">Just you. No group pics. No sunglasses. No hiding the face card.</p><h3>2. Pick your mode</h3><p class="muted">Go Doppel for the familiar, or Chaos for the plot twist.</p></div><div><h3>3. Meet your matches</h3><p class="muted">Swipe through people who match your energy.</p><h3>4. Chat if it clicks</h3><p class="muted">If it’s a match, jump straight into chat.</p></div></div></div>`),
+    faq: () => shell(`<div class="card form-card"><div class="kicker">FAQ</div><h2 style="font-size:40px; margin:10px 0 18px;">The quick answers.</h2><div class="settings-list"><div class="setting-item"><span>Do I need to upload a selfie?</span><span class="muted">Yes — that’s how matching works.</span></div><div class="setting-item"><span>Can I use someone else’s photo?</span><span class="muted">No. Selfies must be your own.</span></div><div class="setting-item"><span>What is Chaos Mode?</span><span class="muted">It flips the vibe and shows your total opposite.</span></div><div class="setting-item"><span>Can I reset my profile?</span><span class="muted">Yes — you can reset this browser version in Settings.</span></div></div></div>`),
+    safety: () => shell(`<div class="card form-card"><div class="kicker">Safety</div><h2 style="font-size:40px; margin:10px 0 18px;">18+, opt-in, and your photo only.</h2><div class="settings-list"><div class="setting-item"><span>Adults only</span><span class="muted">DoppelCrush is for 18+ users.</span></div><div class="setting-item"><span>Use your own photo</span><span class="muted">Only upload selfies of yourself.</span></div><div class="setting-item"><span>Opt-in only</span><span class="muted">Everyone you see joined on purpose.</span></div><div class="setting-item"><span>Report and block</span><span class="muted">Use the built-in tools if anything feels off.</span></div></div></div>`),
   };
 
   const page = routeMap[state.route] || homePage;

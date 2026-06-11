@@ -52,3 +52,10 @@ Build the production version on:
 - Supabase
 
 That next step would add real accounts, shared database, real uploads, real matching logic, and real multi-user chat.
+
+
+## Pro-level polish pass included
+- clickable brand/logo back to Home
+- public top navigation
+- back-to-home link on auth pages
+- consumer-facing copy instead of demo wording
